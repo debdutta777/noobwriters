@@ -20,11 +20,11 @@ const sanitizeHtml = (html: string): string => {
 // GET all chapters for a novel
 export async function GET(
   request: NextRequest,
-  context: { params: { novelId: string } }
+  { params }: { params: { novelId: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
-    const { novelId } = await Promise.resolve(context.params);
+    const { novelId } = params;
     
     if (!session?.user) {
       return NextResponse.json(
@@ -71,11 +71,11 @@ export async function GET(
 // POST create a new chapter
 export async function POST(
   request: NextRequest,
-  context: { params: { novelId: string } }
+  { params }: { params: { novelId: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
-    const { novelId } = await Promise.resolve(context.params);
+    const { novelId } = params;
     
     if (!session?.user) {
       return NextResponse.json(
