@@ -29,19 +29,14 @@ async function verifyNovelOwnership(novelId: string, userId: string) {
   return novel;
 }
 
-// Define interface for route handler parameters
-interface RouteParams {
-  params: {
-    novelId: string;
-    chapterId: string;
-  };
-}
-
 // GET a specific chapter
-export async function GET(request: NextRequest, context: RouteParams) {
+export async function GET(
+  request: Request,
+  { params }: { params: { novelId: string; chapterId: string } }
+) {
   try {
     const session = await getServerSession(authOptions);
-    const { novelId, chapterId } = context.params;
+    const { novelId, chapterId } = params;
     
     if (!session?.user) {
       return NextResponse.json(
@@ -86,10 +81,13 @@ export async function GET(request: NextRequest, context: RouteParams) {
 }
 
 // PUT update a chapter
-export async function PUT(request: NextRequest, context: RouteParams) {
+export async function PUT(
+  request: Request,
+  { params }: { params: { novelId: string; chapterId: string } }
+) {
   try {
     const session = await getServerSession(authOptions);
-    const { novelId, chapterId } = context.params;
+    const { novelId, chapterId } = params;
     
     if (!session?.user) {
       return NextResponse.json(
@@ -193,10 +191,13 @@ export async function PUT(request: NextRequest, context: RouteParams) {
 }
 
 // DELETE a chapter
-export async function DELETE(request: NextRequest, context: RouteParams) {
+export async function DELETE(
+  request: Request,
+  { params }: { params: { novelId: string; chapterId: string } }
+) {
   try {
     const session = await getServerSession(authOptions);
-    const { novelId, chapterId } = context.params;
+    const { novelId, chapterId } = params;
     
     if (!session?.user) {
       return NextResponse.json(

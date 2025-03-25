@@ -17,18 +17,14 @@ const sanitizeHtml = (html: string): string => {
     .replace(/javascript:/gi, ''); // Remove javascript: URLs
 };
 
-// Define interface for route handler parameters
-interface RouteParams {
-  params: {
-    novelId: string;
-  };
-}
-
 // GET all chapters for a novel
-export async function GET(request: NextRequest, context: RouteParams) {
+export async function GET(
+  request: Request,
+  { params }: { params: { novelId: string } }
+) {
   try {
     const session = await getServerSession(authOptions);
-    const { novelId } = context.params;
+    const { novelId } = params;
     
     if (!session?.user) {
       return NextResponse.json(
@@ -73,10 +69,13 @@ export async function GET(request: NextRequest, context: RouteParams) {
 }
 
 // POST create a new chapter
-export async function POST(request: NextRequest, context: RouteParams) {
+export async function POST(
+  request: Request,
+  { params }: { params: { novelId: string } }
+) {
   try {
     const session = await getServerSession(authOptions);
-    const { novelId } = context.params;
+    const { novelId } = params;
     
     if (!session?.user) {
       return NextResponse.json(
