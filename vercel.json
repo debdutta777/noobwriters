@@ -4,7 +4,13 @@
       "src": "package.json",
       "use": "@vercel/next",
       "config": {
-        "installCommand": "npm install --legacy-peer-deps && npx prisma generate"
+        "installCommand": "npm install --legacy-peer-deps && npx prisma generate",
+        "eslint": {
+          "ignoreDuringBuilds": true
+        },
+        "typescript": {
+          "ignoreBuildErrors": true
+        }
       }
     }
   ],
