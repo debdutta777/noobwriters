@@ -3,14 +3,18 @@ import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
 import { authOptions } from '@/lib/auth';
 
+// Define interface for route handler parameters
+interface RouteParams {
+  params: {
+    novelId: string;
+  };
+}
+
 // GET a specific novel
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { novelId: string } }
-) {
+export async function GET(request: NextRequest, context: RouteParams) {
   try {
     const session = await getServerSession(authOptions);
-    const { novelId } = params;
+    const { novelId } = context.params;
     
     if (!session?.user) {
       return NextResponse.json(
