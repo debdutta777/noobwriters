@@ -6,11 +6,11 @@ import { authOptions } from '@/lib/auth';
 // PATCH endpoint to update chapter status
 export async function PATCH(
   request: Request,
-  { params }: { params: { novelId: string; chapterId: string } }
+  context: { params: { novelId: string; chapterId: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
-    const { novelId, chapterId } = params;
+    const { novelId, chapterId } = context.params;
     
     if (!session?.user) {
       return NextResponse.json(
