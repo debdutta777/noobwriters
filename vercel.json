@@ -4,8 +4,12 @@
       "src": "package.json",
       "use": "@vercel/next",
       "config": {
-        "installCommand": "npm install --legacy-peer-deps"
+        "installCommand": "npm install --legacy-peer-deps && npx prisma generate"
       }
     }
-  ]
+  ],
+  "env": {
+    "PRISMA_GENERATE_DATAPROXY": "true"
+  }
+} 
 } 
