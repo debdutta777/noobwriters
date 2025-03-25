@@ -1,51 +1,62 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { hash } from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
-import bcrypt from 'bcryptjs';
+import * as z from 'zod';
 
-export async function POST(req: NextRequest) {
+// Registration input validation schema
+const registerSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+});
+
+export async function POST(request: NextRequest) {
   try {
-    const { name, email, password } = await req.json();
-
+    const body = await request.json();
+    
     // Validate input
-    if (!name || !email || !password) {
+    const result = registerSchema.safeParse(body);
+    if (!result.success) {
       return NextResponse.json(
-        { error: 'Name, email, and password are required' },
+        { error: result.error.errors },
         { status: 400 }
       );
     }
-
+    
+    const { name, email, password } = result.data;
+    
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
       where: { email },
     });
-
+    
     if (existingUser) {
       return NextResponse.json(
         { error: 'User with this email already exists' },
         { status: 409 }
       );
     }
-
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create user
+    
+    // Hash the password
+    const hashedPassword = await hash(password, 12);
+    
+    // Create the user in the database
     const user = await prisma.user.create({
       data: {
         name,
         email,
         password: hashedPassword,
-        userRole: 'USER' // Default role
+        userRole: 'READER', // Default role
       },
     });
-
-    // Remove password from response
+    
+    // Don't return the password
     const { password: _, ...userWithoutPassword } = user;
-
-    return NextResponse.json({
-      user: userWithoutPassword,
-      message: 'Registration successful',
-    });
+    
+    return NextResponse.json(
+      { user: userWithoutPassword },
+      { status: 201 }
+    );
   } catch (error) {
     console.error('Registration error:', error);
     return NextResponse.json(

@@ -4,10 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate",
     "seed-genres": "ts-node --compiler-options \"{\\\"module\\\":\\\"CommonJS\\\"}\" scripts/seedGenres.ts"
   },
   "dependencies": {

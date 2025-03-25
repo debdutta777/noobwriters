@@ -4,19 +4,10 @@ import { PrismaClient } from '@prisma/client';
 // exhausting your database connection limit.
 // Learn more: https://pris.ly/d/help/next-js-best-practices
 
-// Add prisma to the global type
-declare global {
-  var cachedPrisma: PrismaClient;
-}
+const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 
-// Prevent multiple instances of Prisma Client in development
-export let prisma: PrismaClient;
+export const prisma = globalForPrisma.prisma || new PrismaClient({
+  log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+});
 
-if (process.env.NODE_ENV === 'production') {
-  prisma = new PrismaClient();
-} else {
-  if (!global.cachedPrisma) {
-    global.cachedPrisma = new PrismaClient();
-  }
-  prisma = global.cachedPrisma;
-} 
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma; 
