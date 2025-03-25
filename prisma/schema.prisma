@@ -1,0 +1,327 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// Application Models
+// User Model for our application
+model User {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  bio           String?
+  userRole      UserRole  @default(READER)
+  coins         Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  accounts       Account[]
+  sessions       Session[]
+  novels         Novel[]        @relation("AuthorNovels")
+  bookmarks      Bookmark[]
+  comments       Comment[]
+  ratings        Rating[]
+  followedBy     Follows[]      @relation("Following")
+  following      Follows[]      @relation("Follower")
+  readingHistory ReadingHistory[]
+  subscriptions  Subscription[]
+  purchases      Purchase[]
+  notifications  Notification[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  READER
+  AUTHOR
+  EDITOR
+  ADMIN
+}
+
+// Novel Model
+model Novel {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String
+  coverImage  String?      // URL to the stored image
+  coverBlob   Bytes?       // For storing the actual image data
+  imageMime   String?      // MIME type of the image
+  status      NovelStatus  @default(ONGOING)
+  isAdult     Boolean      @default(false)
+  viewCount   Int          @default(0)
+  authorId    String       @db.ObjectId
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Relations
+  author         User             @relation("AuthorNovels", fields: [authorId], references: [id], onDelete: Cascade)
+  chapters       Chapter[]
+  bookmarks      Bookmark[]
+  comments       Comment[]        @relation("NovelComments")
+  ratings        Rating[]         @relation("NovelRatings")
+  genres         GenreOnNovel[]
+  readingHistory ReadingHistory[]
+
+  @@map("novels")
+}
+
+enum NovelStatus {
+  ONGOING
+  COMPLETED
+  HIATUS
+}
+
+// Chapter Model
+model Chapter {
+  id             String        @id @default(auto()) @map("_id") @db.ObjectId
+  title          String
+  content        String
+  chapterNumber  Int
+  wordCount      Int
+  viewCount      Int           @default(0)
+  status         ChapterStatus @default(DRAFT)
+  isPremium      Boolean       @default(false)
+  coinsCost      Int           @default(0)
+  novelId        String        @db.ObjectId
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  scheduledAt    DateTime?
+  coverImage     String?       // URL to the stored image
+  coverBlob      Bytes?        // For storing the actual image data
+  imageMime      String?       // MIME type of the image
+
+  // Relations
+  novel          Novel           @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  comments       Comment[]       @relation("ChapterComments")
+  readingHistory ReadingHistory[]
+  purchases      Purchase[]
+
+  @@map("chapters")
+}
+
+enum ChapterStatus {
+  DRAFT
+  PUBLISHED
+}
+
+// Genre Model
+model Genre {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  novels    GenreOnNovel[]
+
+  @@map("genres")
+}
+
+// GenreOnNovel join table
+model GenreOnNovel {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  genreId   String   @db.ObjectId
+  novelId   String   @db.ObjectId
+  createdAt DateTime @default(now())
+
+  genre     Genre    @relation(fields: [genreId], references: [id], onDelete: Cascade)
+  novel     Novel    @relation(fields: [novelId], references: [id], onDelete: Cascade)
+
+  @@unique([genreId, novelId])
+  @@map("genres_on_novels")
+}
+
+// Bookmark Model
+model Bookmark {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  novelId   String   @db.ObjectId
+  createdAt DateTime @default(now())
+
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  novel     Novel    @relation(fields: [novelId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, novelId])
+  @@map("bookmarks")
+}
+
+// Comment Model
+model Comment {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  content   String
+  userId    String    @db.ObjectId
+  novelId   String?   @db.ObjectId
+  chapterId String?   @db.ObjectId
+  parentId  String?   @db.ObjectId
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // Relations
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  novel     Novel?    @relation("NovelComments", fields: [novelId], references: [id], onDelete: Cascade)
+  chapter   Chapter?  @relation("ChapterComments", fields: [chapterId], references: [id], onDelete: Cascade)
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  replies   Comment[] @relation("CommentReplies")
+
+  @@map("comments")
+}
+
+// Rating Model
+model Rating {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  score     Int      // 1-5 stars
+  review    String?
+  userId    String   @db.ObjectId
+  novelId   String   @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  novel     Novel    @relation("NovelRatings", fields: [novelId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, novelId])
+  @@map("ratings")
+}
+
+// Follows Model
+model Follows {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  followerId  String   @db.ObjectId
+  followingId String   @db.ObjectId
+  createdAt   DateTime @default(now())
+
+  // Relations
+  follower    User     @relation("Follower", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User     @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@map("follows")
+}
+
+// Reading History Model
+model ReadingHistory {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String   @db.ObjectId
+  novelId    String   @db.ObjectId
+  chapterId  String   @db.ObjectId
+  progress   Float    // Percentage of chapter read
+  lastReadAt DateTime @default(now())
+
+  // Relations
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  novel      Novel    @relation(fields: [novelId], references: [id], onDelete: Cascade)
+  chapter    Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, chapterId])
+  @@map("reading_history")
+}
+
+// Subscription Model
+model Subscription {
+  id        String           @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String           @db.ObjectId
+  type      SubscriptionType
+  startDate DateTime         @default(now())
+  endDate   DateTime
+  isActive  Boolean          @default(true)
+  amount    Float
+  
+  // Relations
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+enum SubscriptionType {
+  MONTHLY
+  QUARTERLY
+  ANNUAL
+}
+
+// Purchase Model
+model Purchase {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String   @db.ObjectId
+  chapterId  String   @db.ObjectId
+  amount     Int
+  createdAt  DateTime @default(now())
+
+  // Relations
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chapter    Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@map("purchases")
+}
+
+// Notification Model
+model Notification {
+  id        String            @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String            @db.ObjectId
+  type      NotificationType
+  message   String
+  isRead    Boolean           @default(false)
+  createdAt DateTime          @default(now())
+
+  // Relations
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+enum NotificationType {
+  FOLLOW
+  COMMENT
+  NEW_CHAPTER
+  SUBSCRIPTION
+  SYSTEM
+}
+
+// NextAuth Models
+model Account {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String  @db.ObjectId
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionToken String   @unique
+  userId       String   @db.ObjectId
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}

@@ -1,22 +1,80 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Creator Platform
+
+A web platform for writers to publish and monetize their fiction.
+
+## Database Migration
+
+This project has been migrated from Supabase PostgreSQL to MongoDB Atlas. See [MONGODB_MIGRATION.md](./MONGODB_MIGRATION.md) for details.
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Node.js 18+
+- MongoDB Atlas account
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Setup
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd creator
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Set up environment variables:
+   Create a `.env.local` file with the following:
+   ```
+   # MongoDB Connection
+   DATABASE_URL="your-mongodb-connection-string"
+
+   # NextAuth Configuration
+   NEXTAUTH_URL="http://localhost:3000"
+   NEXTAUTH_SECRET="your-secret-key"
+   ```
+
+4. Push the schema to your database:
+   ```bash
+   npx prisma db push
+   ```
+
+5. Seed the database with initial genres:
+   ```bash
+   node scripts/seed.js
+   ```
+
+6. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+## Features
+
+- User authentication (signup, login, profile management)
+- Novel creation and management
+- Chapter publishing with premium content options
+- Reading experience with history tracking
+- Bookmarking and rating system
+- User following
+- Comment system
+- Dark mode support
+
+## Tech Stack
+
+- **Frontend**: Next.js, React, Tailwind CSS
+- **Backend**: Next.js API Routes
+- **Database**: MongoDB
+- **Authentication**: NextAuth.js
+- **Form Validation**: Zod
+- **Image Processing**: Native Node.js packages
+
+## Contributing
+
+Please read [CONTRIBUTING.md](./CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
