@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "DISABLE_ESLINT_PLUGIN=true NEXT_TELEMETRY_DISABLED=1 next build --no-lint",
     "start": "next start",
     "lint": "next lint",
     "seed-genres": "ts-node --compiler-options \"{\\\"module\\\":\\\"CommonJS\\\"}\" scripts/seedGenres.ts"

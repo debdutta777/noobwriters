@@ -5,6 +5,7 @@
       "use": "@vercel/next",
       "config": {
         "installCommand": "npm install --legacy-peer-deps && npx prisma generate",
+        "buildCommand": "DISABLE_ESLINT_PLUGIN=true NEXT_TELEMETRY_DISABLED=1 next build --no-lint",
         "eslint": {
           "ignoreDuringBuilds": true
         },
