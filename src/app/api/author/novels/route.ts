@@ -14,7 +14,7 @@ import {
   isValidFileSize, 
   saveImageFile 
 } from '@/lib/imageUtils';
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 
 // Schema for novel creation
 const novelSchema = z.object({
