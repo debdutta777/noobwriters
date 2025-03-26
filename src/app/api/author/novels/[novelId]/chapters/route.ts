@@ -7,6 +7,12 @@ import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 
+type RouteContext = {
+  params: {
+    novelId: string;
+  };
+};
+
 // Simple HTML sanitizer to prevent XSS attacks
 const sanitizeHtml = (html: string): string => {
   // This is a very basic sanitizer - in production you would use a library like DOMPurify
@@ -20,11 +26,11 @@ const sanitizeHtml = (html: string): string => {
 // GET all chapters for a novel
 export async function GET(
   request: Request,
-  { params }: { params: { novelId: string } }
+  context: RouteContext
 ) {
   try {
     const session = await getServerSession(authOptions);
-    const { novelId } = params;
+    const { novelId } = context.params;
     
     if (!session?.user) {
       return NextResponse.json(
@@ -71,11 +77,11 @@ export async function GET(
 // POST create a new chapter
 export async function POST(
   request: Request,
-  { params }: { params: { novelId: string } }
+  context: RouteContext
 ) {
   try {
     const session = await getServerSession(authOptions);
-    const { novelId } = params;
+    const { novelId } = context.params;
     
     if (!session?.user) {
       return NextResponse.json(

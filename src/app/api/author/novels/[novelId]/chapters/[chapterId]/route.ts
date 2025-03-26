@@ -29,14 +29,21 @@ async function verifyNovelOwnership(novelId: string, userId: string) {
   return novel;
 }
 
+type RouteContext = {
+  params: {
+    novelId: string;
+    chapterId: string;
+  };
+};
+
 // GET a specific chapter
 export async function GET(
   request: Request,
-  { params }: { params: { novelId: string; chapterId: string } }
+  context: RouteContext
 ) {
   try {
     const session = await getServerSession(authOptions);
-    const { novelId, chapterId } = params;
+    const { novelId, chapterId } = context.params;
     
     if (!session?.user) {
       return NextResponse.json(
@@ -83,11 +90,11 @@ export async function GET(
 // PUT update a chapter
 export async function PUT(
   request: Request,
-  { params }: { params: { novelId: string; chapterId: string } }
+  context: RouteContext
 ) {
   try {
     const session = await getServerSession(authOptions);
-    const { novelId, chapterId } = params;
+    const { novelId, chapterId } = context.params;
     
     if (!session?.user) {
       return NextResponse.json(
@@ -193,11 +200,11 @@ export async function PUT(
 // DELETE a chapter
 export async function DELETE(
   request: Request,
-  { params }: { params: { novelId: string; chapterId: string } }
+  context: RouteContext
 ) {
   try {
     const session = await getServerSession(authOptions);
-    const { novelId, chapterId } = params;
+    const { novelId, chapterId } = context.params;
     
     if (!session?.user) {
       return NextResponse.json(

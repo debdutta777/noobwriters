@@ -3,14 +3,21 @@ import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
 import { authOptions } from '@/lib/auth';
 
+type RouteContext = {
+  params: {
+    novelId: string;
+    chapterId: string;
+  };
+};
+
 // PATCH endpoint to update chapter status
 export async function PATCH(
   request: Request,
-  { params }: { params: { novelId: string; chapterId: string } }
+  context: RouteContext
 ) {
   try {
     const session = await getServerSession(authOptions);
-    const { novelId, chapterId } = params;
+    const { novelId, chapterId } = context.params;
     
     if (!session?.user) {
       return NextResponse.json(
