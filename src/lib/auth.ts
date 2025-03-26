@@ -36,7 +36,7 @@ export async function signUp(email: string, password: string, name: string) {
         email,
         name,
         password: hashedPassword,
-        role: "READER",
+        userRole: "READER",
       },
     });
 

@@ -31,7 +31,7 @@ export async function signUp(email: string, password: string, name: string) {
       .update({
         name,
         password: hashedPassword,
-        role: "READER"
+        userRole: "READER"
       })
       .eq('id', authData.user.id);
 
@@ -146,7 +146,7 @@ export async function getUser() {
     // Get additional user data from database
     const { data: userData, error: userError } = await supabaseClient
       .from('users')
-      .select('id, name, email, image, bio, role, coins')
+      .select('id, name, email, image, bio, userRole, coins')
       .eq('id', data.user.id)
       .single();
     

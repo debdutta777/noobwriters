@@ -43,7 +43,7 @@ function AuthState({ children }: { children: React.ReactNode }) {
       isAuthenticated: !!session?.user,
       isLoading: status === "loading",
       userId: session?.user?.id || null,
-      userRole: session?.user?.role || null,
+      userRole: session?.user?.userRole || null,
       logout: handleLogout,
     });
   }, [session, status]);

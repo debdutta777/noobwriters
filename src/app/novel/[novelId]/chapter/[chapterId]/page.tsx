@@ -467,7 +467,7 @@ export default function ChapterDetailPage() {
                           {new Date(comment.createdAt).toLocaleDateString()} at {new Date(comment.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
-                      {session && (comment.user?.id === session.user.id || session.user.role === 'ADMIN') && (
+                      {session && (comment.user?.id === session.user.id || session.user.userRole === 'ADMIN') && (
                         <button 
                           onClick={() => handleDeleteComment(comment.id)}
                           className="text-red-600 hover:text-red-800 text-sm font-medium"
@@ -556,7 +556,7 @@ export default function ChapterDetailPage() {
                                   {new Date(reply.createdAt).toLocaleDateString()}
                                 </span>
                               </div>
-                              {session && (reply.user?.id === session.user.id || session.user.role === 'ADMIN') && (
+                              {session && (reply.user?.id === session.user.id || session.user.userRole === 'ADMIN') && (
                                 <button 
                                   onClick={() => handleDeleteComment(reply.id)}
                                   className="text-red-600 hover:text-red-800 text-xs font-medium"

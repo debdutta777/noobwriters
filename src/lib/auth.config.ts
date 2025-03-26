@@ -63,7 +63,7 @@ export const authConfig: NextAuthConfig = {
               email: user.email,
               name: user.name,
               image: user.image,
-              role: user.role,
+              userRole: user.userRole,
             };
           }
 
@@ -81,7 +81,7 @@ export const authConfig: NextAuthConfig = {
                 id: authData.user.id,
                 email: authData.user.email,
                 name: authData.user.user_metadata.full_name || authData.user.email.split('@')[0],
-                role: "READER",
+                userRole: "READER",
               },
             });
           }
@@ -91,7 +91,7 @@ export const authConfig: NextAuthConfig = {
             email: user.email,
             name: user.name,
             image: user.image,
-            role: user.role,
+            userRole: user.userRole,
           };
         } catch (error) {
           console.error("Auth error:", error);
@@ -107,14 +107,14 @@ export const authConfig: NextAuthConfig = {
         session.user.name = token.name;
         session.user.email = token.email;
         session.user.image = token.picture;
-        session.user.role = token.role as string;
+        session.user.userRole = token.userRole as string;
       }
       return session;
     },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.role = user.role;
+        token.userRole = user.userRole;
       }
       return token;
     },
