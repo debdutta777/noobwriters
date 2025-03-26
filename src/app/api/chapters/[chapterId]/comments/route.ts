@@ -5,10 +5,12 @@ import { auth } from '@/auth';
 // Get comments for a chapter
 export async function GET(
   req: NextRequest,
-  { params }: { params: { chapterId: string } }
+  context: any
 ) {
   try {
+    const { params } = context;
     const chapterId = params.chapterId;
+    
     const url = new URL(req.url);
     const limit = parseInt(url.searchParams.get('limit') || '20', 10);
     const page = parseInt(url.searchParams.get('page') || '1', 10);
@@ -76,10 +78,12 @@ export async function GET(
 // Add a comment to a chapter
 export async function POST(
   req: NextRequest,
-  { params }: { params: { chapterId: string } }
+  context: any
 ) {
   try {
+    const { params } = context;
     const chapterId = params.chapterId;
+    
     const session = await auth();
     
     if (!session?.user?.email) {
@@ -160,9 +164,12 @@ export async function POST(
 // Delete a comment
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { chapterId: string } }
+  context: any
 ) {
   try {
+    const { params } = context;
+    const chapterId = params.chapterId;
+    
     const url = new URL(req.url);
     const commentId = url.searchParams.get('commentId');
     

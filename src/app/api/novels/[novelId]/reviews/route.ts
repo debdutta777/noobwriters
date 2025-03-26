@@ -5,22 +5,22 @@ import { auth } from '@/auth';
 // Get reviews for a novel
 export async function GET(
   req: NextRequest,
-  { params }: { params: { novelId: string } }
+  context: any
 ) {
   try {
+    const { params } = context;
     const novelId = params.novelId;
+    
     const url = new URL(req.url);
     const limit = parseInt(url.searchParams.get('limit') || '10', 10);
     const page = parseInt(url.searchParams.get('page') || '1', 10);
     const skip = (page - 1) * limit;
     
-    // Fetch the reviews with user information
-    const reviews = await prisma.rating.findMany({
-      where: { 
-        novelId 
-      },
+    // Get reviews with user information
+    const reviews = await prisma.review.findMany({
+      where: { novelId },
       orderBy: {
-        createdAt: 'desc'
+        createdAt: 'desc',
       },
       skip,
       take: limit,
@@ -34,26 +34,28 @@ export async function GET(
         },
       },
     });
-
+    
     // Get total reviews count for pagination
-    const totalReviews = await prisma.rating.count({
+    const totalReviews = await prisma.review.count({
       where: { novelId },
     });
-
-    // Calculate average rating
-    const averageRating = await prisma.rating.aggregate({
+    
+    // Get average rating
+    const ratingStats = await prisma.review.aggregate({
       where: { novelId },
       _avg: {
-        score: true,
-      }
+        rating: true,
+      },
+      _count: true,
     });
-
+    
     return NextResponse.json({
       reviews,
       totalReviews,
       totalPages: Math.ceil(totalReviews / limit),
       currentPage: page,
-      averageRating: averageRating._avg.score || 0
+      averageRating: ratingStats._avg.rating || 0,
+      totalRatings: ratingStats._count,
     });
   } catch (error) {
     console.error('Error fetching reviews:', error);
@@ -67,10 +69,12 @@ export async function GET(
 // Add a review to a novel
 export async function POST(
   req: NextRequest,
-  { params }: { params: { novelId: string } }
+  context: any
 ) {
   try {
+    const { params } = context;
     const novelId = params.novelId;
+    
     const session = await auth();
     
     if (!session?.user?.email) {
@@ -79,70 +83,61 @@ export async function POST(
         { status: 401 }
       );
     }
-
-    const { score, review } = await req.json();
     
-    if (!score || score < 1 || score > 5) {
+    const { rating, content } = await req.json();
+    
+    if (!rating || rating < 1 || rating > 5) {
       return NextResponse.json(
         { error: 'Rating must be between 1 and 5' },
         { status: 400 }
       );
     }
-
+    
     // Find user by email
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
       select: { id: true }
     });
-
+    
     if (!user) {
       return NextResponse.json(
         { error: 'User not found' },
         { status: 404 }
       );
     }
-
-    // Check if the user has already reviewed this novel
-    const existingReview = await prisma.rating.findFirst({
+    
+    // Check if novel exists
+    const novel = await prisma.novel.findUnique({
+      where: { id: novelId },
+    });
+    
+    if (!novel) {
+      return NextResponse.json(
+        { error: 'Novel not found' },
+        { status: 404 }
+      );
+    }
+    
+    // Check if user has already reviewed this novel
+    const existingReview = await prisma.review.findFirst({
       where: {
-        userId: user.id,
         novelId,
+        userId: user.id,
       },
     });
-
+    
     if (existingReview) {
-      // Update existing review
-      const updatedReview = await prisma.rating.update({
-        where: {
-          id: existingReview.id,
-        },
-        data: {
-          score,
-          review,
-          updatedAt: new Date(),
-        },
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              image: true,
-            },
-          },
-        },
-      });
-
-      return NextResponse.json({
-        review: updatedReview,
-        message: 'Review updated successfully',
-      });
+      return NextResponse.json(
+        { error: 'You have already reviewed this novel' },
+        { status: 400 }
+      );
     }
-
-    // Create new review
-    const newReview = await prisma.rating.create({
+    
+    // Create the review
+    const review = await prisma.review.create({
       data: {
-        score,
-        review,
+        rating,
+        content: content || '',
         userId: user.id,
         novelId,
       },
@@ -156,22 +151,26 @@ export async function POST(
         },
       },
     });
-
-    // Update novel's average rating
-    const averageRating = await prisma.rating.aggregate({
+    
+    // Update novel's rating
+    const updatedRatingStats = await prisma.review.aggregate({
       where: { novelId },
       _avg: {
-        score: true,
-      }
+        rating: true,
+      },
+      _count: true,
     });
-
+    
     await prisma.novel.update({
       where: { id: novelId },
-      data: { rating: averageRating._avg.score || 0 }
+      data: {
+        averageRating: updatedRatingStats._avg.rating || 0,
+        totalRatings: updatedRatingStats._count,
+      },
     });
-
+    
     return NextResponse.json({
-      review: newReview,
+      review,
       message: 'Review added successfully',
     });
   } catch (error) {
@@ -186,10 +185,22 @@ export async function POST(
 // Delete a review
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { novelId: string } }
+  context: any
 ) {
   try {
+    const { params } = context;
     const novelId = params.novelId;
+    
+    const url = new URL(req.url);
+    const reviewId = url.searchParams.get('reviewId');
+    
+    if (!reviewId) {
+      return NextResponse.json(
+        { error: 'Review ID is required' },
+        { status: 400 }
+      );
+    }
+    
     const session = await auth();
     
     if (!session?.user?.email) {
@@ -198,55 +209,62 @@ export async function DELETE(
         { status: 401 }
       );
     }
-
+    
     // Find user by email
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { id: true }
+      select: { id: true, userRole: true }
     });
-
+    
     if (!user) {
       return NextResponse.json(
         { error: 'User not found' },
         { status: 404 }
       );
     }
-
-    // Check if the review exists and belongs to the user
-    const review = await prisma.rating.findFirst({
-      where: {
-        userId: user.id,
-        novelId,
-      },
+    
+    // Find the review
+    const review = await prisma.review.findUnique({
+      where: { id: reviewId },
     });
-
+    
     if (!review) {
       return NextResponse.json(
         { error: 'Review not found' },
         { status: 404 }
       );
     }
-
+    
+    // Check if the user is the author of the review or an admin
+    if (review.userId !== user.id && user.userRole !== 'ADMIN') {
+      return NextResponse.json(
+        { error: 'Not authorized to delete this review' },
+        { status: 403 }
+      );
+    }
+    
     // Delete the review
-    await prisma.rating.delete({
-      where: {
-        id: review.id,
-      },
+    await prisma.review.delete({
+      where: { id: reviewId },
     });
-
-    // Update novel's average rating
-    const averageRating = await prisma.rating.aggregate({
+    
+    // Update novel's rating
+    const updatedRatingStats = await prisma.review.aggregate({
       where: { novelId },
       _avg: {
-        score: true,
-      }
+        rating: true,
+      },
+      _count: true,
     });
-
+    
     await prisma.novel.update({
       where: { id: novelId },
-      data: { rating: averageRating._avg.score || 0 }
+      data: {
+        averageRating: updatedRatingStats._avg.rating || 0,
+        totalRatings: updatedRatingStats._count,
+      },
     });
-
+    
     return NextResponse.json({
       message: 'Review deleted successfully',
     });
