@@ -18,7 +18,7 @@ export const supabaseAdmin = {
     getSession: () => Promise.resolve({ data: null, error: null }),
     exchangeCodeForSession: (code: string) => Promise.resolve({ data: null, error: null }),
   },
-  from: () => ({
+  from: (table: string) => ({
     update: () => ({
       eq: () => Promise.resolve({ error: null }),
     }),

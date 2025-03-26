@@ -395,15 +395,21 @@ export default function NovelDetailPage() {
                   Genres
                 </h2>
                 <div className="flex flex-wrap gap-2">
-                  {novel.genres.map((genre) => (
-                    <Link
-                      key={genre}
-                      href={`/browse?genre=${genre}`}
-                      className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-3 py-1 rounded-full text-sm hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                    >
-                      {genre}
-                    </Link>
-                  ))}
+                  {novel.genres.map((genre) => {
+                    // Handle both string and object genre formats
+                    const genreName = typeof genre === 'string' ? genre : genre.name;
+                    const genreId = typeof genre === 'string' ? genre : genre.id;
+                    
+                    return (
+                      <Link
+                        key={genreId}
+                        href={`/browse?genre=${genreName}`}
+                        className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-3 py-1 rounded-full text-sm hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                      >
+                        {genreName}
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
             )}
