@@ -32,11 +32,11 @@ async function verifyNovelOwnership(novelId: string, userId: string) {
 // GET a specific chapter
 export async function GET(
   request: Request,
-  { params }: { params: { novelId: string; chapterId: string } }
+  context: { params: { novelId: string; chapterId: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
-    const { novelId, chapterId } = params;
+    const { novelId, chapterId } = context.params;
     
     if (!session?.user) {
       return NextResponse.json(
@@ -83,11 +83,11 @@ export async function GET(
 // PUT update a chapter
 export async function PUT(
   request: Request,
-  { params }: { params: { novelId: string; chapterId: string } }
+  context: { params: { novelId: string; chapterId: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
-    const { novelId, chapterId } = params;
+    const { novelId, chapterId } = context.params;
     
     if (!session?.user) {
       return NextResponse.json(
@@ -172,7 +172,7 @@ export async function PUT(
         title,
         content,
         chapterNumber,
-        status,
+        status: status as "DRAFT" | "PUBLISHED",
         isPremium,
         coinsCost,
         wordCount,
@@ -193,11 +193,11 @@ export async function PUT(
 // DELETE a chapter
 export async function DELETE(
   request: Request,
-  { params }: { params: { novelId: string; chapterId: string } }
+  context: { params: { novelId: string; chapterId: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
-    const { novelId, chapterId } = params;
+    const { novelId, chapterId } = context.params;
     
     if (!session?.user) {
       return NextResponse.json(

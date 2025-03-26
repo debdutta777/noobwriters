@@ -6,11 +6,11 @@ import { authOptions } from '@/lib/auth';
 // GET a specific novel
 export async function GET(
   request: Request,
-  { params }: { params: { novelId: string } }
+  context: { params: { novelId: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
-    const { novelId } = params;
+    const { novelId } = context.params;
     
     if (!session?.user) {
       return NextResponse.json(
