@@ -16,7 +16,7 @@ export const supabaseClient = {
 export const supabaseAdmin = {
   auth: {
     getSession: () => Promise.resolve({ data: null, error: null }),
-    exchangeCodeForSession: () => Promise.resolve({ data: null, error: null }),
+    exchangeCodeForSession: (code: string) => Promise.resolve({ data: null, error: null }),
   },
   from: () => ({
     update: () => ({
