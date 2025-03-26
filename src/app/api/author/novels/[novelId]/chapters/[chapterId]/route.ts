@@ -31,12 +31,12 @@ async function verifyNovelOwnership(novelId: string, userId: string) {
 
 // GET a specific chapter
 export async function GET(
-  request: Request,
-  context: { params: { novelId: string; chapterId: string } }
+  req: Request,
+  { params }: { params: { novelId: string; chapterId: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
-    const { novelId, chapterId } = context.params;
+    const { novelId, chapterId } = params;
     
     if (!session?.user) {
       return NextResponse.json(
@@ -82,12 +82,12 @@ export async function GET(
 
 // PUT update a chapter
 export async function PUT(
-  request: Request,
-  context: { params: { novelId: string; chapterId: string } }
+  req: Request,
+  { params }: { params: { novelId: string; chapterId: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
-    const { novelId, chapterId } = context.params;
+    const { novelId, chapterId } = params;
     
     if (!session?.user) {
       return NextResponse.json(
@@ -122,7 +122,7 @@ export async function PUT(
     }
     
     // Parse the form data
-    const formData = await request.formData();
+    const formData = await req.formData();
     const title = formData.get('title') as string;
     let content = formData.get('content') as string;
     
@@ -192,12 +192,12 @@ export async function PUT(
 
 // DELETE a chapter
 export async function DELETE(
-  request: Request,
-  context: { params: { novelId: string; chapterId: string } }
+  req: Request,
+  { params }: { params: { novelId: string; chapterId: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
-    const { novelId, chapterId } = context.params;
+    const { novelId, chapterId } = params;
     
     if (!session?.user) {
       return NextResponse.json(

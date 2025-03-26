@@ -5,12 +5,12 @@ import { authOptions } from '@/lib/auth';
 
 // PATCH endpoint to update chapter status
 export async function PATCH(
-  request: Request,
-  context: { params: { novelId: string; chapterId: string } }
+  req: Request,
+  { params }: { params: { novelId: string; chapterId: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
-    const { novelId, chapterId } = context.params;
+    const { novelId, chapterId } = params;
     
     if (!session?.user) {
       return NextResponse.json(
@@ -50,7 +50,7 @@ export async function PATCH(
     }
     
     // Extract new status from request body
-    const data = await request.json();
+    const data = await req.json();
     const { status } = data;
     
     if (!status || !['DRAFT', 'PUBLISHED'].includes(status)) {

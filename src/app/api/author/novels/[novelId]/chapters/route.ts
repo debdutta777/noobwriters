@@ -19,12 +19,12 @@ const sanitizeHtml = (html: string): string => {
 
 // GET all chapters for a novel
 export async function GET(
-  request: Request,
-  context: { params: { novelId: string } }
+  req: Request,
+  { params }: { params: { novelId: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
-    const { novelId } = context.params;
+    const { novelId } = params;
     
     if (!session?.user) {
       return NextResponse.json(
@@ -70,12 +70,12 @@ export async function GET(
 
 // POST create a new chapter
 export async function POST(
-  request: Request,
-  context: { params: { novelId: string } }
+  req: Request,
+  { params }: { params: { novelId: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
-    const { novelId } = context.params;
+    const { novelId } = params;
     
     if (!session?.user) {
       return NextResponse.json(
@@ -100,7 +100,7 @@ export async function POST(
     }
     
     // Parse the form data
-    const formData = await request.formData();
+    const formData = await req.formData();
     const title = formData.get('title') as string;
     let content = formData.get('content') as string;
     

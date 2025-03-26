@@ -5,12 +5,12 @@ import { authOptions } from '@/lib/auth';
 
 // GET a specific novel
 export async function GET(
-  request: Request,
-  context: { params: { novelId: string } }
+  req: Request,
+  { params }: { params: { novelId: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
-    const { novelId } = context.params;
+    const { novelId } = params;
     
     if (!session?.user) {
       return NextResponse.json(
