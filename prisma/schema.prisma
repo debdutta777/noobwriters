@@ -19,6 +19,8 @@ model User {
   bio           String?
   userRole      UserRole  @default(READER)
   coins         Int       @default(0)
+  walletCoins   Int       @default(0)
+  premiumUntil  DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -34,6 +36,7 @@ model User {
   readingHistory ReadingHistory[]
   subscriptions  Subscription[]
   purchases      Purchase[]
+  transactions   Transaction[]
   notifications  Notification[]
 
   @@map("users")
@@ -259,6 +262,23 @@ model Purchase {
   chapter    Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
   @@map("purchases")
+}
+
+// After the Purchase model, before the Notification model
+model Transaction {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String     @db.ObjectId
+  amount    Int
+  type      String     // COIN_PURCHASE, CHAPTER_PURCHASE, etc.
+  status    String     // PENDING, COMPLETED, FAILED
+  metadata  Json?      // Flexible field for additional data
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  // Relations
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("transactions")
 }
 
 // Notification Model
