@@ -16,7 +16,7 @@ export interface FeaturedNovelProps {
     };
     viewCount?: number;
     chaptersCount?: number;
-    genres?: string[];
+    genres?: string[] | Array<{id: string, name: string}>;
     status?: string;
   };
 }
@@ -91,15 +91,19 @@ export const FeaturedNovel = ({ novel }: FeaturedNovelProps) => {
 
           {/* Genres */}
           <div className="flex flex-wrap gap-2 mb-4">
-            {novel.genres && Array.isArray(novel.genres) && novel.genres.map((genre) => (
-              <Link
-                key={genre}
-                href={`/browse?genre=${genre}`}
-                className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-2 py-1 rounded text-sm"
-              >
-                {genre}
-              </Link>
-            ))}
+            {novel.genres && Array.isArray(novel.genres) && novel.genres.map((genre) => {
+              // Handle both string and object genre formats
+              const genreName = typeof genre === 'string' ? genre : genre.name;
+              return (
+                <Link
+                  key={typeof genre === 'string' ? genre : genre.id}
+                  href={`/browse?genre=${genreName}`}
+                  className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-2 py-1 rounded text-sm"
+                >
+                  {genreName}
+                </Link>
+              );
+            })}
           </div>
 
           {/* Actions */}

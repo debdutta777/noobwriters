@@ -6,14 +6,15 @@ import { useSearchParams } from "next/navigation";
 
 interface GenreSelectorProps {
   genres: string[];
+  activeGenre?: string;
 }
 
-export const GenreSelector = ({ genres }: GenreSelectorProps) => {
+export const GenreSelector = ({ genres, activeGenre: propActiveGenre }: GenreSelectorProps) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
   const searchParams = useSearchParams();
-  const activeGenre = searchParams.get("genre") || "";
+  const activeGenre = propActiveGenre || searchParams.get("genre") || "";
 
   const checkScroll = () => {
     if (!scrollContainerRef.current) return;

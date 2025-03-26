@@ -21,7 +21,7 @@ export interface NovelCardProps {
       name: string;
       image?: string;
     };
-    genres?: string[];
+    genres?: string[] | Array<{id: string, name: string}>;
     status?: string;
     rating?: number;
     viewCount?: number;
@@ -81,15 +81,19 @@ export const NovelCard = ({ novel }: NovelCardProps) => {
       <div className="p-3">
         <div className="flex flex-wrap gap-2 mb-2">
           {genres && genres.length > 0 ? (
-            genres.slice(0, 2).map((genre) => (
-              <Link
-                key={genre}
-                href={`/browse?genre=${genre}`}
-                className="text-xs bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 px-2 py-1 rounded-full hover:bg-indigo-200 dark:hover:bg-indigo-800 transition-colors"
-              >
-                {genre}
-              </Link>
-            ))
+            genres.slice(0, 2).map((genre) => {
+              // Handle both string and object genre formats
+              const genreName = typeof genre === 'string' ? genre : genre.name;
+              return (
+                <Link
+                  key={typeof genre === 'string' ? genre : genre.id}
+                  href={`/browse?genre=${genreName}`}
+                  className="text-xs bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 px-2 py-1 rounded-full hover:bg-indigo-200 dark:hover:bg-indigo-800 transition-colors"
+                >
+                  {genreName}
+                </Link>
+              );
+            })
           ) : (
             <span className="text-xs text-gray-500 dark:text-gray-400">No genres</span>
           )}
