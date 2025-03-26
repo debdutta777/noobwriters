@@ -28,7 +28,14 @@ export async function GET(req: NextRequest) {
     // Add genre filter if provided
     if (genre && genre !== 'all') {
       whereConditions.genres = {
-        has: genre
+        some: {
+          genre: {
+            name: {
+              equals: genre,
+              mode: 'insensitive'
+            }
+          }
+        }
       };
     }
     
@@ -78,6 +85,11 @@ export async function GET(req: NextRequest) {
             id: true,
           },
         },
+        genres: {
+          include: {
+            genre: true,
+          },
+        },
       },
       orderBy,
       skip,
@@ -99,7 +111,7 @@ export async function GET(req: NextRequest) {
       viewCount: novel.viewCount,
       averageRating: novel.averageRating,
       totalRatings: novel.totalRatings,
-      genres: novel.genres,
+      genres: novel.genres.map(g => g.genre),
       createdAt: novel.createdAt,
       updatedAt: novel.updatedAt,
       author: novel.author,
