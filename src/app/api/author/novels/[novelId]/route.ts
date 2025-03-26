@@ -3,20 +3,14 @@ import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
 import { authOptions } from '@/lib/auth';
 
-type RouteContext = {
-  params: {
-    novelId: string;
-  };
-};
-
 // GET a specific novel
 export async function GET(
   request: Request,
-  context: RouteContext
+  { params }: { params: { novelId: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
-    const { novelId } = context.params;
+    const { novelId } = params;
     
     if (!session?.user) {
       return NextResponse.json(
