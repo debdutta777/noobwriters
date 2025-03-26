@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
           id: session?.user?.id,
           name: session?.user?.name,
           email: session?.user?.email,
-          role: session?.user?.role,
+          userRole: session?.user?.userRole,
         }
       },
       timestamp: new Date().toISOString(),

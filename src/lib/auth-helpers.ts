@@ -67,7 +67,7 @@ export async function roleMiddleware(req: NextRequest, roles: string[]) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
   
-  if (!roles.includes(session.user.role)) {
+  if (!roles.includes(session.user.userRole)) {
     return NextResponse.json({ message: "Forbidden" }, { status: 403 });
   }
   

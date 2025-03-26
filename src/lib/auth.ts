@@ -153,7 +153,7 @@ export const authOptions: AuthOptions = {
             name: user.name,
             email: user.email,
             image: user.image,
-            role: user.userRole,
+            userRole: user.userRole,
           };
         } catch (error) {
           console.error("Auth error:", error);
@@ -169,14 +169,14 @@ export const authOptions: AuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.role = user.role;
+        token.userRole = user.userRole;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
-        session.user.role = token.role as string;
+        session.user.userRole = token.userRole as string;
       }
       return session;
     },
