@@ -31,6 +31,7 @@ model User {
   bookmarks      Bookmark[]
   comments       Comment[]
   ratings        Rating[]
+  reviews        Review[]
   followedBy     Follows[]      @relation("Following")
   following      Follows[]      @relation("Follower")
   readingHistory ReadingHistory[]
@@ -52,18 +53,20 @@ enum UserRole {
 
 // Novel Model
 model Novel {
-  id          String       @id @default(auto()) @map("_id") @db.ObjectId
-  title       String
-  description String
-  coverImage  String?      // URL to the stored image
-  coverBlob   Bytes?       // For storing the actual image data
-  imageMime   String?      // MIME type of the image
-  status      NovelStatus  @default(ONGOING)
-  isAdult     Boolean      @default(false)
-  viewCount   Int          @default(0)
-  authorId    String       @db.ObjectId
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
+  title         String
+  description   String
+  coverImage    String?      // URL to the stored image
+  coverBlob     Bytes?       // For storing the actual image data
+  imageMime     String?      // MIME type of the image
+  status        NovelStatus  @default(ONGOING)
+  isAdult       Boolean      @default(false)
+  viewCount     Int          @default(0)
+  averageRating Float        @default(0)
+  totalRatings  Int          @default(0)
+  authorId      String       @db.ObjectId
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 
   // Relations
   author         User             @relation("AuthorNovels", fields: [authorId], references: [id], onDelete: Cascade)
@@ -71,6 +74,7 @@ model Novel {
   bookmarks      Bookmark[]
   comments       Comment[]        @relation("NovelComments")
   ratings        Rating[]         @relation("NovelRatings")
+  reviews        Review[]         @relation("NovelReviews")
   genres         GenreOnNovel[]
   readingHistory ReadingHistory[]
 
@@ -194,6 +198,24 @@ model Rating {
 
   @@unique([userId, novelId])
   @@map("ratings")
+}
+
+// Review Model
+model Review {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  rating    Int      // 1-5 stars
+  content   String?
+  userId    String   @db.ObjectId
+  novelId   String   @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  novel     Novel    @relation("NovelReviews", fields: [novelId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, novelId])
+  @@map("reviews")
 }
 
 // Follows Model
