@@ -51,7 +51,7 @@ export async function authMiddleware(request: NextRequest) {
     );
   }
   
-  return session;
+  return null; // Continue with the request if authenticated
 }
 
 /**

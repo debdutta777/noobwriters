@@ -5,10 +5,17 @@ export async function GET(req: NextRequest) {
   try {
     // Check if user is authenticated
     const authCheck = await authMiddleware(req);
-    if (authCheck) return authCheck;
+    if (authCheck) return authCheck; // If authCheck returns a response, it means there was an auth error
 
     // Get session
     const session = await getServerAuthSession();
+    
+    // Ensure session exists after middleware check
+    if (!session) {
+      return NextResponse.json({
+        error: "Session not found"
+      }, { status: 401 });
+    }
     
     return NextResponse.json({
       status: "success",
