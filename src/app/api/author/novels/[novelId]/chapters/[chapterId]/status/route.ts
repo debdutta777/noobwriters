@@ -1,16 +1,18 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
 import { authOptions } from '@/lib/auth';
 
 // PATCH endpoint to update chapter status
 export async function PATCH(
-  req: Request,
-  { params }: { params: { novelId: string; chapterId: string } }
+  request: Request,
+  context: any
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const { params } = context;
     const { novelId, chapterId } = params;
+    
+    const session = await getServerSession(authOptions);
     
     if (!session?.user) {
       return NextResponse.json(
@@ -50,7 +52,7 @@ export async function PATCH(
     }
     
     // Extract new status from request body
-    const data = await req.json();
+    const data = await request.json();
     const { status } = data;
     
     if (!status || !['DRAFT', 'PUBLISHED'].includes(status)) {

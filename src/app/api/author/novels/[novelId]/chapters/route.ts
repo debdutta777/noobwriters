@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
 import { authOptions } from '@/lib/auth';
@@ -17,14 +17,15 @@ const sanitizeHtml = (html: string): string => {
     .replace(/javascript:/gi, ''); // Remove javascript: URLs
 };
 
-// GET all chapters for a novel
 export async function GET(
-  req: Request,
-  { params }: { params: { novelId: string } }
+  request: Request,
+  context: any
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const { params } = context;
     const { novelId } = params;
+    
+    const session = await getServerSession(authOptions);
     
     if (!session?.user) {
       return NextResponse.json(
@@ -68,14 +69,15 @@ export async function GET(
   }
 }
 
-// POST create a new chapter
 export async function POST(
-  req: Request,
-  { params }: { params: { novelId: string } }
+  request: Request,
+  context: any
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const { params } = context;
     const { novelId } = params;
+    
+    const session = await getServerSession(authOptions);
     
     if (!session?.user) {
       return NextResponse.json(
@@ -100,7 +102,7 @@ export async function POST(
     }
     
     // Parse the form data
-    const formData = await req.formData();
+    const formData = await request.formData();
     const title = formData.get('title') as string;
     let content = formData.get('content') as string;
     

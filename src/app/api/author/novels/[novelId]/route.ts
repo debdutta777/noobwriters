@@ -1,16 +1,18 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
 import { authOptions } from '@/lib/auth';
 
 // GET a specific novel
 export async function GET(
-  req: Request,
-  { params }: { params: { novelId: string } }
+  request: Request,
+  context: any
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const { params } = context;
     const { novelId } = params;
+    
+    const session = await getServerSession(authOptions);
     
     if (!session?.user) {
       return NextResponse.json(

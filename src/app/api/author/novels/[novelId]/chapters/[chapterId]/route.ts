@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/prisma';
 import { authOptions } from '@/lib/auth';
@@ -29,14 +29,15 @@ async function verifyNovelOwnership(novelId: string, userId: string) {
   return novel;
 }
 
-// GET a specific chapter
 export async function GET(
-  req: Request,
-  { params }: { params: { novelId: string; chapterId: string } }
+  request: Request,
+  context: any
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const { params } = context;
     const { novelId, chapterId } = params;
+    
+    const session = await getServerSession(authOptions);
     
     if (!session?.user) {
       return NextResponse.json(
@@ -80,14 +81,15 @@ export async function GET(
   }
 }
 
-// PUT update a chapter
 export async function PUT(
-  req: Request,
-  { params }: { params: { novelId: string; chapterId: string } }
+  request: Request,
+  context: any
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const { params } = context;
     const { novelId, chapterId } = params;
+    
+    const session = await getServerSession(authOptions);
     
     if (!session?.user) {
       return NextResponse.json(
@@ -122,7 +124,7 @@ export async function PUT(
     }
     
     // Parse the form data
-    const formData = await req.formData();
+    const formData = await request.formData();
     const title = formData.get('title') as string;
     let content = formData.get('content') as string;
     
@@ -190,14 +192,15 @@ export async function PUT(
   }
 }
 
-// DELETE a chapter
 export async function DELETE(
-  req: Request,
-  { params }: { params: { novelId: string; chapterId: string } }
+  request: Request,
+  context: any
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const { params } = context;
     const { novelId, chapterId } = params;
+    
+    const session = await getServerSession(authOptions);
     
     if (!session?.user) {
       return NextResponse.json(
