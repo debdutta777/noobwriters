@@ -36,6 +36,7 @@ model User {
   readingHistory ReadingHistory[]
   subscriptions  Subscription[]
   purchases      Purchase[]
+  chapterPurchases ChapterPurchase[]
   transactions   Transaction[]
   notifications  Notification[]
 
@@ -106,6 +107,7 @@ model Chapter {
   comments       Comment[]       @relation("ChapterComments")
   readingHistory ReadingHistory[]
   purchases      Purchase[]
+  chapterPurchases ChapterPurchase[]
 
   @@map("chapters")
 }
@@ -262,6 +264,22 @@ model Purchase {
   chapter    Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
   @@map("purchases")
+}
+
+// ChapterPurchase Model - tracks individual chapter purchases 
+model ChapterPurchase {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String   @db.ObjectId
+  chapterId  String   @db.ObjectId
+  amount     Int
+  createdAt  DateTime @default(now())
+
+  // Relations
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chapter    Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, chapterId])
+  @@map("chapter_purchases")
 }
 
 // After the Purchase model, before the Notification model
