@@ -4,12 +4,12 @@
 export const supabaseClient = {
   auth: {
     getSession: () => Promise.resolve({ data: null, error: null }),
-    signInWithPassword: () => Promise.resolve({ data: null, error: null }),
-    signUp: () => Promise.resolve({ data: null, error: null }),
+    signInWithPassword: (params: any) => Promise.resolve({ data: { user: null, session: null }, error: null }),
+    signUp: (params: any) => Promise.resolve({ data: { user: null, session: null }, error: null }),
     signOut: () => Promise.resolve({ error: null }),
-    resetPasswordForEmail: () => Promise.resolve({ error: null }),
-    updateUser: () => Promise.resolve({ error: null }),
-    getUser: () => Promise.resolve({ data: null, error: null }),
+    resetPasswordForEmail: (email: string, options?: any) => Promise.resolve({ error: null }),
+    updateUser: (params: any) => Promise.resolve({ error: null }),
+    getUser: () => Promise.resolve({ data: { user: null }, error: null }),
   },
 };
 
